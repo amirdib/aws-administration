@@ -1,0 +1,34 @@
+#!/usr/bin/env python3
+import os
+import argparse
+import subprocess
+import boto.ec2
+
+from misc import get_instances_states
+
+instances_ids_to_stop = ['i-62c588e8', #adherence_calcul
+			 'i-252895a9', #regeneration visu
+			 'i-9fe300ae'] #vegetation
+instances_ids_to_start = ['i-62c588e8',
+			 'i-c51cac49',#regeneration_calcul
+			 'i-252895a9']
+
+conn = boto.ec2.connect_to_region("eu-west-1")
+
+parser = argparse.ArgumentParser(
+    description='start or stop aws instances', prog='connect')
+
+parser.add_argument('action', choices=('start', 'stop','state'))
+args = parser.parse_args()
+
+if args.action == 'start':
+    conn.start_instances(instance_ids=instances_ids_to_start)
+    print("Starting " + ','.join(instances_ids_to_start) + " instances")
+elif args.action == 'stop':
+    conn.stop_instances(instance_ids=instances_ids_to_stop)
+    print("Stopping " + ','.join(instances_ids_to_stop) + " instances")
+elif args.action == 'state':
+    get_instances_states(conn)
+else:
+    parser.print_help()
+    exit(1)
